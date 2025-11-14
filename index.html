@@ -1,0 +1,432 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heating Calculator - Professional Electrical Engineering Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-bolt"></i>
+                <span>Heating Calculator</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#contact" class="nav-link" data-page="contact">Contact Us</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <section id="home" class="page active home-page">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Thermal Simulation Generator</span>
+                    <br>
+                </h1>
+                <p class="hero-subtitle">Professional tool for calculating adiabatic and non-adiabatic heating for electrical materials based on IEC 949 standards</p>
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>IEC 949 Compliant</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Accurate Calculations</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Multiple Materials</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-section">
+            <div class="container">
+                <div class="insight-grid">
+                    <div class="insight-card">
+                        <h2><i class="fas fa-book-open"></i> Engineering Standards</h2>
+                        <p>All calculations reference IEC 949 material constants so your thermal checks align with internationally recognised practice.</p>
+                        <ul>
+                            <li>Built-in lookup for copper, aluminium, lead, and sheath data</li>
+                            <li>Adiabatic and non-adiabatic assessments in a single run</li>
+                            <li>Configurable factors for specialised installations</li>
+                        </ul>
+                    </div>
+                    <div class="insight-card">
+                        <h2><i class="fas fa-route"></i> Analysis Workflow</h2>
+                        <p>Follow a guided workflow from inputs to final decision, highlighting each engineering step.</p>
+                        <ol>
+                            <li>Define operating scenario and thermal limits</li>
+                            <li>Evaluate adiabatic limits for short-duration faults</li>
+                            <li>Apply ε factor for realistic heat dissipation</li>
+                        </ol>
+                    </div>
+                    <div class="insight-card">
+                        <h2><i class="fas fa-lightbulb"></i> Design Intelligence</h2>
+                        <p>Instantly translate calculated areas and currents into actionable sizing guidance for your cable schedules.</p>
+                        <ul>
+                            <li>Automatic rounding to practical standard sizes</li>
+                            <li>Suitability verdict with safety margin context</li>
+                            <li>Export-ready summaries for design records</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="calculator-card animated-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calculator"></i> Calculation Form</h2>
+                    <p>Enter the required parameters to calculate heating assumptions</p>
+                </div>
+                <form id="heatingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materialType">
+                                <i class="fas fa-layer-group"></i> Material Type:
+                            </label>
+                            <select id="materialType" name="materialType" required>
+                                <option value="">Select Material Type</option>
+                                <option value="sheath">Sheath</option>
+                                <option value="conductor">Conductor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="conductorTypeGroup" style="display: none;">
+                            <label for="conductorType">
+                                <i class="fas fa-wire"></i> Conductor Material:
+                            </label>
+                            <select id="conductorType" name="conductorType">
+                                <option value="">Select Conductor Material</option>
+                                <option value="aluminum">Aluminum</option>
+                                <option value="copper">Copper</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="calculationMode">
+                                <i class="fas fa-sliders-h"></i> Calculation Mode:
+                            </label>
+                            <select id="calculationMode" name="calculationMode" required>
+                                <option value="">Select Calculation Mode</option>
+                                <option value="current">Calculate Current (Given Area)</option>
+                                <option value="area">Calculate Area (Given Current)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" id="currentGroup">
+                            <label for="current">
+                                <i class="fas fa-bolt"></i> Current (A):
+                            </label>
+                            <input type="number" id="current" name="current" step="0.01" placeholder="Enter current in Amperes">
+                            <small class="form-hint">Required when calculating area</small>
+                        </div>
+
+                        <div class="form-group" id="areaGroup">
+                            <label for="crossSection">
+                                <i class="fas fa-square"></i> Cross-Sectional Area (mm²):
+                            </label>
+                            <input type="number" id="crossSection" name="crossSection" step="0.01" placeholder="Enter area in mm²">
+                            <small class="form-hint">Required when calculating current</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="time">
+                                <i class="fas fa-clock"></i> Time (s):
+                            </label>
+                            <input type="number" id="time" name="time" step="0.01" required placeholder="Enter time in seconds">
+                        </div>
+
+                        <div class="form-group" id="initialTempGroup">
+                            <label for="initialTemp">
+                                <i class="fas fa-thermometer-half"></i> Initial Temperature θᵢ (°C):
+                            </label>
+                            <input type="number" id="initialTemp" name="initialTemp" step="0.1" value="25" required placeholder="Enter initial temperature">
+                        </div>
+
+                        <div class="form-group" id="finalTempGroup">
+                            <label for="finalTemp">
+                                <i class="fas fa-thermometer-full"></i> Final Temperature θ_f (°C):
+                            </label>
+                            <input type="number" id="finalTemp" name="finalTemp" step="0.1" value="90" required placeholder="Enter final temperature">
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="calculateNonAdiabatic" name="calculateNonAdiabatic">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">Calculate Non-Adiabatic Heating</span>
+                        </label>
+                    </div>
+
+                    <div id="nonAdiabaticParams" class="non-adiabatic-section" style="display: none;">
+                        <h3><i class="fas fa-cog"></i> Non-Adiabatic Parameters</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="F">Factor F:</label>
+                                <input type="number" id="F" name="F" step="0.01" value="1.0" placeholder="Enter factor F">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="delta">Delta (δ):</label>
+                                <input type="number" id="delta" name="delta" step="0.01" value="1.0" placeholder="Enter delta">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sigma1">Sigma 1 (σ₁):</label>
+                                <input type="number" id="sigma1" name="sigma1" step="0.01" value="1.0" placeholder="Enter sigma 1">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="sigma2">Sigma 2 (σ₂):</label>
+                                <input type="number" id="sigma2" name="sigma2" step="0.01" value="0.5" placeholder="Enter sigma 2">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="sigma3">Sigma 3 (σ₃):</label>
+                                <input type="number" id="sigma3" name="sigma3" step="0.01" value="0.5" placeholder="Enter sigma 3">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-btn">
+                            <i class="fas fa-calculator"></i> Calculate
+                        </button>
+                        <button type="button" class="reset-btn" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="results" class="results-card animated-card" style="display: none;">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Calculation Results</h2>
+                    <div class="export-buttons">
+                        <button type="button" class="export-btn csv-btn" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button type="button" class="export-btn pdf-btn" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                <div id="materialInfo" class="material-info"></div>
+                <div id="resultKpis" class="kpi-grid" style="display: none;"></div>
+                <div id="resultsSummary" class="summary-card" style="display: none;"></div>
+                <div id="suitabilityCheck" class="suitability-card"></div>
+                <div class="results-grid">
+                    <div class="result-section" id="assumptionsSection">
+                        <h3><i class="fas fa-sliders-h"></i> Standards & Assumptions</h3>
+                        <div class="result-item">
+                            <span class="label">Factor F:</span>
+                            <span class="value" id="assumptionF">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Delta (δ):</span>
+                            <span class="value" id="assumptionDelta">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Sigma 1 (σ₁):</span>
+                            <span class="value" id="assumptionSigma1">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Sigma 2 (σ₂):</span>
+                            <span class="value" id="assumptionSigma2">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Sigma 3 (σ₃):</span>
+                            <span class="value" id="assumptionSigma3">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">ε Applied:</span>
+                            <span class="value" id="assumptionEpsilonApplied">-</span>
+                        </div>
+                    </div>
+                    <div class="result-section">
+                        <h3><i class="fas fa-fire"></i> Step A: Adiabatic Results (Calculated)</h3>
+                        <div class="result-item">
+                            <span class="label">Adiabatic Current (I_AD):</span>
+                            <span class="value" id="adiabaticCurrent">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Adiabatic Area (S_AD):</span>
+                            <span class="value" id="adiabaticArea">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Material Constant K (Input):</span>
+                            <span class="value" id="constantK">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Material Constant β (Input):</span>
+                            <span class="value" id="constantBeta">-</span>
+                        </div>
+                    </div>
+
+                    <div class="result-section" id="nonAdiabaticSection" style="display: none;">
+                        <h3><i class="fas fa-wind"></i> Step B & C: Non-Adiabatic Results (Calculated)</h3>
+                        <div class="result-item">
+                            <span class="label">Factor M:</span>
+                            <span class="value" id="factorM">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Non-Adiabatic Factor (ε):</span>
+                            <span class="value" id="epsilon">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Permissible Current (I_perm):</span>
+                            <span class="value" id="permissibleCurrent">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Non-Adiabatic Area (S_non):</span>
+                            <span class="value" id="nonAdiabaticArea">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Include jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Contact Us Page -->
+    <section id="contact" class="page contact-page">
+        <div class="container">
+            <div class="contact-hero">
+                <h1 class="gradient-text">Get In Touch</h1>
+                <p>Have questions or need support? We'd love to hear from you!</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info-card animated-card">
+                    <h2><i class="fas fa-info-circle"></i> Contact Information</h2>
+                    <div class="info-items">
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h3>Email</h3>
+                                <p>support@heatingcalculator.com</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h3>Phone</h3>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h3>Address</h3>
+                                <p>123 Engineering Street<br>Tech City, TC 12345</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h3>Business Hours</h3>
+                                <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-card animated-card">
+                    <h2><i class="fas fa-paper-plane"></i> Send Us a Message</h2>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contactName">
+                                    <i class="fas fa-user"></i> Name:
+                                </label>
+                                <input type="text" id="contactName" name="contactName" required placeholder="Your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">
+                                    <i class="fas fa-envelope"></i> Email:
+                                </label>
+                                <input type="email" id="contactEmail" name="contactEmail" required placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactSubject">
+                                <i class="fas fa-tag"></i> Subject:
+                            </label>
+                            <input type="text" id="contactSubject" name="contactSubject" required placeholder="What is this regarding?">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">
+                                <i class="fas fa-comment-alt"></i> Message:
+                            </label>
+                            <textarea id="contactMessage" name="contactMessage" rows="6" required placeholder="Tell us more about your inquiry..."></textarea>
+                        </div>
+                        <button type="submit" class="calculate-btn">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-bolt"></i> Heating Calculator</h3>
+                <p>Professional electrical engineering tool for accurate heating calculations based on IEC 949 standards.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Heating Calculator. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="constants.js"></script>
+    <script src="calculator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
