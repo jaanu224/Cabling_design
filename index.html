@@ -11,7 +11,13 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
+            <div class="nav-logo-left">
+                <img src="balfour-beatty-logo.png" alt="Balfour Beatty" class="company-logo" id="companyLogo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="company-logo-text" style="display: none;">
+                    <span>Balfour Beatty</span>
+                </div>
+            </div>
+            <div class="nav-title-center">
                 <i class="fas fa-bolt"></i>
                 <span>Heating Calculator</span>
             </div>
@@ -33,9 +39,7 @@
             <div class="hero-content">
                 <h1 class="hero-title">
                     <span class="gradient-text">Thermal Simulation Generator</span>
-                    <br>
                 </h1>
-                <p class="hero-subtitle">Professional tool for calculating adiabatic and non-adiabatic heating for electrical materials based on IEC 949 standards</p>
             </div>
         </div>
 
@@ -53,16 +57,15 @@
                             </label>
                             <select id="materialType" name="materialType" required>
                                 <option value="">Select Material Type</option>
-                                <option value="sheath">Sheath</option>
                                 <option value="conductor">Conductor</option>
                             </select>
                         </div>
 
-                        <div class="form-group" id="conductorTypeGroup" style="display: none;">
+                        <div class="form-group" id="conductorTypeGroup">
                             <label for="conductorType">
                                 <i class="fas fa-wire"></i> Conductor Material:
                             </label>
-                            <select id="conductorType" name="conductorType">
+                            <select id="conductorType" name="conductorType" required>
                                 <option value="">Select Conductor Material</option>
                                 <option value="aluminum">Aluminum</option>
                                 <option value="copper">Copper</option>
@@ -86,9 +89,9 @@
                     <div class="form-row">
                         <div class="form-group" id="currentGroup">
                             <label for="current">
-                                <i class="fas fa-bolt"></i> Current (A):
+                                <i class="fas fa-bolt"></i> Current (kA):
                             </label>
-                            <input type="number" id="current" name="current" step="0.01" placeholder="Enter current in Amperes">
+                            <input type="number" id="current" name="current" step="0.01" placeholder="Enter current in kilo Amperes">
                             <small class="form-hint">Required when calculating area</small>
                         </div>
 
@@ -98,6 +101,14 @@
                             </label>
                             <input type="number" id="crossSection" name="crossSection" step="0.01" placeholder="Enter area in mm²">
                             <small class="form-hint">Required when calculating current</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="voltage">
+                                <i class="fas fa-plug"></i> Voltage (kV):
+                            </label>
+                            <input type="number" id="voltage" name="voltage" step="0.01" placeholder="Enter voltage in kilo Volts">
+                            <small class="form-hint">System voltage</small>
                         </div>
                     </div>
 
@@ -113,14 +124,16 @@
                             <label for="initialTemp">
                                 <i class="fas fa-thermometer-half"></i> Initial Temperature θᵢ (°C):
                             </label>
-                            <input type="number" id="initialTemp" name="initialTemp" step="0.1" value="25" required placeholder="Enter initial temperature">
+                            <input type="number" id="initialTemp" name="initialTemp" step="0.1" value="90" required readonly disabled style="background-color: #f3f4f6; cursor: not-allowed;">
+                            <small class="form-hint">Fixed value</small>
                         </div>
 
                         <div class="form-group" id="finalTempGroup">
                             <label for="finalTemp">
                                 <i class="fas fa-thermometer-full"></i> Final Temperature θ_f (°C):
                             </label>
-                            <input type="number" id="finalTemp" name="finalTemp" step="0.1" value="90" required placeholder="Enter final temperature">
+                            <input type="number" id="finalTemp" name="finalTemp" step="0.1" value="250" required readonly disabled style="background-color: #f3f4f6; cursor: not-allowed;">
+                            <small class="form-hint">Fixed value</small>
                         </div>
                     </div>
 

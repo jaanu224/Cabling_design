@@ -144,14 +144,15 @@ body.page-insights {
     }
 }
 
-/* Hero Section */
+/* Compact Hero Section */
 .hero-section {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
     color: white;
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(20, 184, 166, 0.92) 100%);
-    border-radius: 0 0 36px 36px;
-    box-shadow: 0 25px 60px rgba(37, 99, 235, 0.25);
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -160,8 +161,8 @@ body.page-insights {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top right, rgba(244, 114, 182, 0.35), transparent 45%);
-    opacity: 0.7;
+    background: radial-gradient(circle at top right, rgba(244, 114, 182, 0.25), transparent 45%);
+    opacity: 0.6;
 }
 
 .hero-content {
@@ -170,25 +171,21 @@ body.page-insights {
 }
 
 .hero-title {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0;
     line-height: 1.2;
+    font-weight: 700;
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #171616 0%, #161616 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    display: none; /* Hide subtitle completely */
 }
 
 .hero-features {
@@ -930,12 +927,13 @@ body.page-insights {
         left: 0;
     }
 
-    .hero-title {
-        font-size: 2.5rem;
+    .hero-section {
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
     }
-
-    .hero-subtitle {
-        font-size: 1rem;
+    
+    .hero-title {
+        font-size: 1.5rem;
     }
 
     .form-row {
@@ -981,4 +979,44 @@ body.page-insights {
     .hero-title {
         font-size: 2rem;
     }
+}
+
+/* Company Logo Styles */
+.company-logo {
+    height: 45px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    transition: var(--transition);
+    cursor: pointer;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.company-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+.company-logo-text {
+    display: flex;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-left: 10px;
+}
+
+/* Style for fixed/disabled input fields */
+input[readonly][disabled] {
+    background-color: #f3f4f6 !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+    border-color: #d1d5db;
+}
+
+input[readonly][disabled]:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #d1d5db;
 }
