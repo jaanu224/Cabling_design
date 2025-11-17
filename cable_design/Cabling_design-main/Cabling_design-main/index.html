@@ -1,0 +1,467 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heating Calculator - Professional Electrical Engineering Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo-left">
+                <img src="balfour-beatty-logo.png" alt="Balfour Beatty" class="company-logo" id="companyLogo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="company-logo-text" style="display: none;">
+                    <span>Balfour Beatty</span>
+                </div>
+            </div>
+            <div class="nav-title-center">
+                <i class="fas fa-bolt"></i>
+                <span>Heating Calculator</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#references" class="nav-link" data-page="references">Reference Tables</a></li>
+                <li><a href="#contact" class="nav-link" data-page="contact">Contact Us</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <section id="home" class="page active home-page">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Thermal Simulation Generator</span>
+                </h1>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="calculator-card animated-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calculator"></i> Calculation Form</h2>
+                    <p>Enter the required parameters to calculate heating assumptions</p>
+                </div>
+                <form id="heatingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materialType">
+                                <i class="fas fa-layer-group"></i> Material Type:
+                            </label>
+                            <select id="materialType" name="materialType" required>
+                                <option value="">Select Material Type</option>
+                                <option value="conductor">Conductor</option>
+                                <option value="sheath">Sheath / Screen</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="conductorTypeGroup">
+                            <label for="conductorType">
+                                <i class="fas fa-wire"></i> Conductor Material:
+                            </label>
+                            <select id="conductorType" name="conductorType" required>
+                                <option value="">Select Conductor Material</option>
+                                <option value="aluminum">Aluminum</option>
+                                <option value="copper">Copper</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="sheathTypeGroup" style="display: none;">
+                            <label for="sheathType">
+                                <i class="fas fa-shield-alt"></i> Sheath / Screen Material:
+                            </label>
+                            <select id="sheathType" name="sheathType">
+                                <option value="">Select Sheath Material</option>
+                                <option value="sheathLead">Lead or Lead Alloy</option>
+                                <option value="sheathSteel">Steel Armour</option>
+                                <option value="sheathBronze">Bronze Armour</option>
+                                <option value="sheathAluminum">Aluminum Armour</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="calculationMode">
+                                <i class="fas fa-sliders-h"></i> Calculation Mode:
+                            </label>
+                            <select id="calculationMode" name="calculationMode" required>
+                                <option value="">Select Calculation Mode</option>
+                                <option value="current">Calculate Current (Given Area)</option>
+                                <option value="area">Calculate Area (Given Current)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" id="currentGroup">
+                            <label for="current">
+                                <i class="fas fa-bolt"></i> Current (kA):
+                            </label>
+                            <input type="number" id="current" name="current" step="0.01" placeholder="Enter current in kilo Amperes">
+                            <small class="form-hint">Required when calculating area</small>
+                        </div>
+
+                        <div class="form-group" id="areaGroup">
+                            <label for="crossSection">
+                                <i class="fas fa-square"></i> Cross-Sectional Area (mm²):
+                            </label>
+                            <input type="number" id="crossSection" name="crossSection" step="0.01" placeholder="Enter area in mm²">
+                            <small class="form-hint">Required when calculating current</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="voltage">
+                                <i class="fas fa-plug"></i> Voltage (kV):
+                            </label>
+                            <input type="number" id="voltage" name="voltage" step="0.01" placeholder="Enter voltage in kilo Volts">
+                            <small class="form-hint">System voltage</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="time">
+                                <i class="fas fa-clock"></i> Time (s):
+                            </label>
+                            <input type="number" id="time" name="time" step="0.01" required placeholder="Enter time in seconds">
+                        </div>
+
+                        <div class="form-group" id="initialTempGroup">
+                            <label for="initialTemp">
+                                <i class="fas fa-thermometer-half"></i> Initial Temperature θᵢ (°C):
+                            </label>
+                            <input type="number" id="initialTemp" name="initialTemp" step="0.1" value="90" required readonly disabled style="background-color: #f3f4f6; cursor: not-allowed;">
+                            <small class="form-hint">Fixed value</small>
+                        </div>
+
+                        <div class="form-group" id="finalTempGroup">
+                            <label for="finalTemp">
+                                <i class="fas fa-thermometer-full"></i> Final Temperature θ_f (°C):
+                            </label>
+                            <input type="number" id="finalTemp" name="finalTemp" step="0.1" value="250" required readonly disabled style="background-color: #f3f4f6; cursor: not-allowed;">
+                            <small class="form-hint">Fixed value</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="calculateNonAdiabatic" name="calculateNonAdiabatic">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">Calculate Non-Adiabatic Heating</span>
+                        </label>
+                    </div>
+
+                    <div id="nonAdiabaticParams" class="non-adiabatic-section" style="display: none;">
+                        <h3><i class="fas fa-cog"></i> Non-Adiabatic Parameters</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="F">Factor F:</label>
+                                <input type="number" id="F" name="F" step="0.01" value="1.0" placeholder="Enter factor F">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="delta">Delta (δ):</label>
+                                <input type="number" id="delta" name="delta" step="0.01" value="1.0" placeholder="Enter delta">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sigma1">Sigma 1 (σ₁):</label>
+                                <input type="number" id="sigma1" name="sigma1" step="0.01" value="1.0" placeholder="Enter sigma 1">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="sigma2">Sigma 2 (σ₂):</label>
+                                <input type="number" id="sigma2" name="sigma2" step="0.01" value="0.5" placeholder="Enter sigma 2">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="sigma3">Sigma 3 (σ₃):</label>
+                                <input type="number" id="sigma3" name="sigma3" step="0.01" value="0.5" placeholder="Enter sigma 3">
+                                <small class="form-hint">Uses material default if not specified</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-btn">
+                            <i class="fas fa-calculator"></i> Calculate
+                        </button>
+                        <button type="button" class="reset-btn" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="results" class="results-card animated-card" style="display: none;">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Calculation Results</h2>
+                    <div class="export-buttons">
+                        <button type="button" class="export-btn csv-btn" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button type="button" class="export-btn pdf-btn" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="results-experience">
+                    <div class="highlight-grid" id="resultsHighlights"></div>
+                    <div class="result-details" id="resultDetails"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Include jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Contact Us Page -->
+    <section id="contact" class="page contact-page">
+        <div class="container">
+            <div class="contact-hero">
+                <h1 class="gradient-text">Get In Touch</h1>
+                <p>Have questions or need support? We'd love to hear from you!</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info-card animated-card">
+                    <h2><i class="fas fa-info-circle"></i> Contact Information</h2>
+                    <div class="info-items">
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h3>Email</h3>
+                                <p>support@heatingcalculator.com</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h3>Phone</h3>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h3>Address</h3>
+                                <p>123 Engineering Street<br>Tech City, TC 12345</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h3>Business Hours</h3>
+                                <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-card animated-card">
+                    <h2><i class="fas fa-paper-plane"></i> Send Us a Message</h2>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contactName">
+                                    <i class="fas fa-user"></i> Name:
+                                </label>
+                                <input type="text" id="contactName" name="contactName" required placeholder="Your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">
+                                    <i class="fas fa-envelope"></i> Email:
+                                </label>
+                                <input type="email" id="contactEmail" name="contactEmail" required placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactSubject">
+                                <i class="fas fa-tag"></i> Subject:
+                            </label>
+                            <input type="text" id="contactSubject" name="contactSubject" required placeholder="What is this regarding?">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">
+                                <i class="fas fa-comment-alt"></i> Message:
+                            </label>
+                            <textarea id="contactMessage" name="contactMessage" rows="6" required placeholder="Tell us more about your inquiry..."></textarea>
+                        </div>
+                        <button type="submit" class="calculate-btn">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reference Tables Page -->
+    <section id="references" class="page reference-page">
+        <div class="container">
+            <div class="reference-hero">
+                <h1 class="gradient-text">Reference Tables</h1>
+                <p>Extracts from IEC 949 to support simplified conductor sizing.</p>
+            </div>
+            <div class="reference-grid">
+                <div class="reference-card animated-card">
+                    <h2><i class="fas fa-layer-group"></i> Table I – Extended Material Data</h2>
+                    <p>Full IEC 949 Table I values (K, β, σ_c, ρ₂₀) for conductors and metallic coverings.</p>
+                    <div class="table-wrapper">
+                        <table class="reference-table">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>K [A·s<sup>½</sup>/mm²]</th>
+                                    <th>β (K)</th>
+                                    <th>σ<sub>c</sub> [J/K·m³]</th>
+                                    <th>ρ<sub>20</sub> [Ω·m]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="table-section">a) Conductors</td>
+                                </tr>
+                                <tr><td>Copper</td><td>226</td><td>234.5</td><td>3.45 × 10<sup>6</sup></td><td>1.7241 × 10<sup>-8</sup></td></tr>
+                                <tr><td>Aluminium</td><td>148</td><td>228</td><td>2.5 × 10<sup>6</sup></td><td>2.8264 × 10<sup>-8</sup></td></tr>
+                                <tr>
+                                    <td colspan="5" class="table-section">b) Sheaths, screens and armour</td>
+                                </tr>
+                                <tr><td>Lead or lead alloy</td><td>41</td><td>230</td><td>1.45 × 10<sup>6</sup></td><td>21.4 × 10<sup>-8</sup></td></tr>
+                                <tr><td>Steel</td><td>78</td><td>202</td><td>3.8 × 10<sup>6</sup></td><td>13.8 × 10<sup>-8</sup></td></tr>
+                                <tr><td>Bronze</td><td>180</td><td>313</td><td>3.4 × 10<sup>6</sup></td><td>3.5 × 10<sup>-8</sup></td></tr>
+                                <tr><td>Aluminium</td><td>148</td><td>228</td><td>2.5 × 10<sup>6</sup></td><td>2.84 × 10<sup>-8</sup></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="reference-card animated-card">
+                    <h2><i class="fas fa-fire-alt"></i> Table II – Thermal Constants of Materials</h2>
+                    <p>Thermal resistivity (ρ) and volumetric specific heat (σ).</p>
+                    <div class="table-wrapper">
+                        <table class="reference-table">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>ρ (K·m/W)</th>
+                                    <th>σ (J/K·m³)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Impregnated paper (solid type)</td><td>6.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Impregnated paper (oil-filled)</td><td>5.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Oil</td><td>7.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PE</td><td>3.5</td><td>2.4 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>XLPE</td><td>3.5</td><td>2.4 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PVC ≤ 3 kV</td><td>5.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PVC &gt; 3 kV</td><td>6.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>EPR ≤ 3 kV</td><td>3.5</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>EPR &gt; 3 kV</td><td>5.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Butyl rubber</td><td>5.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Natural rubber</td><td>5.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Compounded jute &amp; fibrous</td><td>6.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Rubber sandwich protection</td><td>6.0</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Polychloroprene</td><td>5.5</td><td>2.0 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PVC ≤ 35 kV (covering)</td><td>5.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PVC &gt; 35 kV (covering)</td><td>6.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PVC/bitumen on corrugated Al sheath</td><td>6.0</td><td>1.7 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>PE covering</td><td>3.5</td><td>2.4 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Semi-conducting XLPE &amp; PE</td><td>2.5</td><td>2.4 &times; 10<sup>6</sup></td></tr>
+                                <tr><td>Semi-conducting EPR</td><td>3.5</td><td>2.1 &times; 10<sup>6</sup></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="reference-card animated-card">
+                    <h2><i class="fas fa-table"></i> Table III – Simplified Formula Constants</h2>
+                    <p>Constants X and Y for conductors and spaced wire screens.</p>
+                    <div class="table-wrapper">
+                        <table class="reference-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Insulation</th>
+                                    <th colspan="2">Copper</th>
+                                    <th colspan="2">Aluminum</th>
+                                </tr>
+                                <tr>
+                                    <th>X [(mm²/s)<sup>½</sup>]</th>
+                                    <th>Y [mm²/s]</th>
+                                    <th>X [(mm²/s)<sup>½</sup>]</th>
+                                    <th>Y [mm²/s]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>PVC ≤ 3 kV</td>
+                                    <td>0.29</td>
+                                    <td>0.06</td>
+                                    <td>0.40</td>
+                                    <td>0.08</td>
+                                </tr>
+                                <tr>
+                                    <td>PVC &gt; 3 kV</td>
+                                    <td>0.27</td>
+                                    <td>0.05</td>
+                                    <td>0.37</td>
+                                    <td>0.07</td>
+                                </tr>
+                                <tr>
+                                    <td>XLPE</td>
+                                    <td>0.41</td>
+                                    <td>0.12</td>
+                                    <td>0.57</td>
+                                    <td>0.16</td>
+                                </tr>
+                                <tr>
+                                    <td>EPR ≤ 3 kV</td>
+                                    <td>0.38</td>
+                                    <td>0.10</td>
+                                    <td>0.52</td>
+                                    <td>0.14</td>
+                                </tr>
+                                <tr>
+                                    <td>EPR &gt; 3 kV</td>
+                                    <td>0.32</td>
+                                    <td>0.07</td>
+                                    <td>0.44</td>
+                                    <td>0.10</td>
+                                </tr>
+                                <tr>
+                                    <td>Paper (oil-filled)</td>
+                                    <td>0.45</td>
+                                    <td>0.14</td>
+                                    <td>0.62</td>
+                                    <td>0.20</td>
+                                </tr>
+                                <tr>
+                                    <td>Paper (others)</td>
+                                    <td>0.29</td>
+                                    <td>0.06</td>
+                                    <td>0.40</td>
+                                    <td>0.08</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="constants.js"></script>
+    <script src="calculator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
