@@ -102,15 +102,23 @@ function initializeFormHandlers() {
         materialTypeSelect.addEventListener('change', function() {
             const conductorTypeGroup = document.getElementById('conductorTypeGroup');
             const conductorType = document.getElementById('conductorType');
+            const sheathTypeGroup = document.getElementById('sheathTypeGroup');
+            const sheathType = document.getElementById('sheathType');
             const initialTempInput = document.getElementById('initialTemp');
             const finalTempInput = document.getElementById('finalTemp');
             const nonAdiabaticCheckbox = document.getElementById('calculateNonAdiabatic');
             const nonAdiabaticParams = document.getElementById('nonAdiabaticParams');
             
             if (this.value === 'conductor') {
-                conductorTypeGroup.style.display = 'block';
-                conductorType.required = true;
-                // Fix temperatures for conductors
+                if (conductorTypeGroup) conductorTypeGroup.style.display = 'block';
+                if (sheathTypeGroup) sheathTypeGroup.style.display = 'none';
+                if (conductorType) {
+                    conductorType.required = true;
+                }
+                if (sheathType) {
+                    sheathType.required = false;
+                    sheathType.value = '';
+                }
                 if (initialTempInput) {
                     initialTempInput.value = 90;
                     initialTempInput.disabled = true;
@@ -127,10 +135,40 @@ function initializeFormHandlers() {
                 if (nonAdiabaticParams) {
                     nonAdiabaticParams.style.display = 'none';
                 }
+            } else if (this.value === 'sheath') {
+                if (conductorTypeGroup) conductorTypeGroup.style.display = 'none';
+                if (sheathTypeGroup) sheathTypeGroup.style.display = 'block';
+                if (conductorType) {
+                    conductorType.required = false;
+                    conductorType.value = '';
+                }
+                if (sheathType) sheathType.required = true;
+                if (initialTempInput) {
+                    initialTempInput.value = 90;
+                    initialTempInput.disabled = true;
+                }
+                if (finalTempInput) {
+                    finalTempInput.value = 250;
+                    finalTempInput.disabled = true;
+                }
+                if (nonAdiabaticCheckbox) {
+                    nonAdiabaticCheckbox.checked = false;
+                    nonAdiabaticCheckbox.disabled = true;
+                }
+                if (nonAdiabaticParams) {
+                    nonAdiabaticParams.style.display = 'none';
+                }
             } else {
-                conductorTypeGroup.style.display = 'none';
-                conductorType.required = false;
-                conductorType.value = '';
+                if (conductorTypeGroup) conductorTypeGroup.style.display = 'none';
+                if (sheathTypeGroup) sheathTypeGroup.style.display = 'none';
+                if (conductorType) {
+                    conductorType.required = false;
+                    conductorType.value = '';
+                }
+                if (sheathType) {
+                    sheathType.required = false;
+                    sheathType.value = '';
+                }
                 // Enable temperature inputs for non-conductors
                 if (initialTempInput) {
                     initialTempInput.disabled = false;
@@ -149,6 +187,8 @@ function initializeFormHandlers() {
     // Make conductor type visible by default and set fixed temperatures
     const conductorTypeGroup = document.getElementById('conductorTypeGroup');
     const conductorType = document.getElementById('conductorType');
+    const sheathTypeGroup = document.getElementById('sheathTypeGroup');
+    const sheathType = document.getElementById('sheathType');
     const initialTempInput = document.getElementById('initialTemp');
     const finalTempInput = document.getElementById('finalTemp');
     
@@ -157,6 +197,12 @@ function initializeFormHandlers() {
     }
     if (conductorType) {
         conductorType.required = true;
+    }
+    if (sheathTypeGroup) {
+        sheathTypeGroup.style.display = 'none';
+    }
+    if (sheathType) {
+        sheathType.required = false;
     }
     if (initialTempInput) {
         initialTempInput.value = 90;
@@ -237,6 +283,7 @@ function initializeFormHandlers() {
             // Get form values
             const materialType = document.getElementById('materialType').value;
             const conductorType = document.getElementById('conductorType').value;
+            const sheathType = document.getElementById('sheathType').value;
             const calculationMode = document.getElementById('calculationMode').value;
             // Convert kA to A for calculations
             const currentInKA = parseFloat(document.getElementById('current').value);
@@ -290,6 +337,17 @@ function initializeFormHandlers() {
                     alert('Please select a conductor material type.');
                     return;
                 }
+            } else if (materialType === 'sheath') {
+                if (!sheathType) {
+                    alert('Please select a sheath or armour material.');
+                    return;
+                }
+                materialConstants = MATERIAL_CONSTANTS[sheathType];
+                if (!materialConstants) {
+                    alert('Selected sheath material is not configured.');
+                    return;
+                }
+                materialName = materialConstants.name || 'Sheath';
             } else {
                 alert('Please select a material type.');
                 return;
@@ -311,6 +369,7 @@ function initializeFormHandlers() {
                 initialTemp,
                 finalTemp,
                 voltage: voltage || null,
+                materialType,
                 materialConstants,
                 F: finalF,
                 delta: finalDelta,
@@ -337,6 +396,7 @@ function initializeFormHandlers() {
                 inputParams: {
                     materialType,
                     conductorType,
+                    sheathType,
                     current: calculationMode === 'area' ? current : null,
                     area: calculationMode === 'current' ? area : null,
                     time,
@@ -368,204 +428,96 @@ function initializeFormHandlers() {
  */
 function displayResults(materialName, materialConstants, adiabaticResults, nonAdiabaticResults, calculationMode, params) {
     const resultsCard = document.getElementById('results');
-    const materialInfo = document.getElementById('materialInfo');
-    
-    // Check if this is a conductor (to hide non-adiabatic results)
-    const isConductor = materialName.includes('Conductor');
-    
-    // Get voltage from params
+    const highlightGrid = document.getElementById('resultsHighlights');
+    const resultDetails = document.getElementById('resultDetails');
+    const logTerm = Math.log((params.finalTemp + materialConstants.beta) / (params.initialTemp + materialConstants.beta));
+    const suggestedArea = getSuggestedStandardArea(adiabaticResults.S_AD);
+    const timeSeconds = params.time ?? params?.inputParams?.time ?? 0;
     const voltage = params.voltage || currentCalculationData?.inputParams?.voltage;
-    
-    // Display material information (these are input constants from IEC 949, used in calculations)
-    materialInfo.innerHTML = `
-        <h3>Material: ${materialName}</h3>
-        <p><strong>Material Constant K (IEC 949):</strong> ${materialConstants.K} A/mm²·√s</p>
-        <p><strong>Material Constant β (IEC 949):</strong> ${materialConstants.beta}</p>
-        <p><strong>Material Constant σ₁ (IEC 949):</strong> ${materialConstants.sigma1.toExponential(2)} W/m·K</p>
-        <p><strong>Initial Temperature:</strong> 90°C (Fixed)</p>
-        <p><strong>Final Temperature:</strong> 250°C (Fixed)</p>
-        ${voltage ? `<p><strong>Voltage:</strong> ${voltage.toFixed(2)} kV</p>` : ''}
-        <p><strong>Calculation Mode:</strong> ${calculationMode === 'current' ? 'Calculate Current (Given Area)' : 'Calculate Area (Given Current)'}</p>
-    `;
-    
-    // Display CALCULATED adiabatic results (Step A)
-    // I_AD and S_AD are calculated using formulas, not constants
-    // Convert I_AD from A to kA for display
-    document.getElementById('adiabaticCurrent').textContent = 
-        `${(adiabaticResults.I_AD / 1000).toFixed(2)} kA`;
-    document.getElementById('adiabaticArea').textContent = 
-        `${adiabaticResults.S_AD.toFixed(2)} mm²`;
-    
-    // Show material constants used (for reference, these are inputs to calculations)
-    document.getElementById('constantK').textContent = 
-        `${adiabaticResults.K} A/mm²·√s (IEC 949 constant)`;
-    document.getElementById('constantBeta').textContent = 
-        `${adiabaticResults.beta} (IEC 949 constant)`;
-    
-    // Standards & Assumptions section - hide for conductors
-    const assumptionsSection = document.getElementById('assumptionsSection');
-    if (assumptionsSection) {
-        assumptionsSection.style.display = isConductor ? 'none' : 'block';
-    }
-    
-    // Standards & Assumptions section
-    const fVal = params.F;
-    const dVal = params.delta;
-    const s1 = params.sigma1 ?? materialConstants.sigma1;
-    const s2 = params.sigma2 ?? materialConstants.sigma2;
-    const s3 = params.sigma3 ?? materialConstants.sigma3;
-    const epsApplied = nonAdiabaticResults ? 'Yes' : 'No';
-    const setTextIf = (id, text) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    };
-    setTextIf('assumptionF', fVal !== undefined ? String(fVal) : '—');
-    setTextIf('assumptionDelta', dVal !== undefined ? String(dVal) : '—');
-    setTextIf('assumptionSigma1', s1 !== undefined ? Number(s1).toExponential ? Number(s1).toExponential(2) : String(s1) : '—');
-    setTextIf('assumptionSigma2', s2 !== undefined ? String(s2) : '—');
-    setTextIf('assumptionSigma3', s3 !== undefined ? String(s3) : '—');
-    setTextIf('assumptionEpsilonApplied', epsApplied);
-    
-    // Display CALCULATED non-adiabatic results if calculated (Step B & C)
-    // Hide non-adiabatic section for conductors
-    const nonAdiabaticSection = document.getElementById('nonAdiabaticSection');
-    if (nonAdiabaticResults && !isConductor) {
-        nonAdiabaticSection.style.display = 'block';
-        // M is calculated using formula: M = (F/(δ·10⁻³)) · ((σ₂ + σ₃)/σ₁)
-        document.getElementById('factorM').textContent = 
-            `${nonAdiabaticResults.M.toFixed(4)}`;
-        // ε is calculated using formula: ε = 1 + 0.61 M√t - 0.069 (M√t)² + 0.0043 (M√t)³
-        document.getElementById('epsilon').textContent = 
-            `${nonAdiabaticResults.epsilon.toFixed(4)}`;
-        // I_perm is calculated using formula: I_perm = ε · I_AD
-        document.getElementById('permissibleCurrent').textContent = 
-            `${(nonAdiabaticResults.I_perm / 1000).toFixed(2)} kA`;
-        // S_non is calculated using formula: S_non = S_AD / ε
-        document.getElementById('nonAdiabaticArea').textContent = 
-            `${nonAdiabaticResults.S_non.toFixed(2)} mm²`;
-    } else {
-        nonAdiabaticSection.style.display = 'none';
-    }
-    
-    // Build and render KPI summary grid - only adiabatic for conductors
-    const kpiGrid = document.getElementById('resultKpis');
-    if (kpiGrid) {
-        const kpis = [
-            { label: 'Adiabatic Area Required', value: `${adiabaticResults.S_AD.toFixed(2)} mm²`, cls: 'kpi--primary' },
-            { label: 'Adiabatic Current (I_AD)', value: `${(adiabaticResults.I_AD / 1000).toFixed(2)} kA`, cls: 'kpi--secondary' },
+
+    if (highlightGrid) {
+        const highlightData = [
+            {
+                icon: 'fas fa-bolt',
+                title: 'Adiabatic Current',
+                value: `${(adiabaticResults.I_AD / 1000).toFixed(2)} kA`,
+                subtext: 'Fault withstand capability'
+            },
+            {
+                icon: 'fas fa-border-all',
+                title: 'Calculated S_AD',
+                value: `${adiabaticResults.S_AD.toFixed(2)} mm²`,
+                subtext: 'Minimum required area'
+            },
+            {
+                icon: 'fas fa-crop-alt',
+                title: 'Suggested Standard',
+                value: `${suggestedArea ? suggestedArea.toFixed(2) : '—'} mm²`,
+                subtext: 'Next preferred IEC size'
+            },
+            {
+                icon: 'fas fa-magnet',
+                title: 'K Constant',
+                value: `${adiabaticResults.K} A/mm²·√s`,
+                subtext: 'Source: IEC 949'
+            },
+            {
+                icon: 'fas fa-temperature-high',
+                title: 'β Constant',
+                value: `${adiabaticResults.beta}`,
+                subtext: 'Thermal coefficient'
+            }
         ];
-        if (nonAdiabaticResults && !isConductor) {
-            kpis.push(
-                { label: 'Non-Adiabatic Factor (ε)', value: `${nonAdiabaticResults.epsilon.toFixed(2)}`, cls: 'kpi--accent' },
-                { label: 'Adjusted Area (S_non)', value: `${nonAdiabaticResults.S_non.toFixed(2)} mm²`, cls: 'kpi--warning' },
-                { label: 'Permissible Current (I_perm)', value: `${(nonAdiabaticResults.I_perm / 1000).toFixed(2)} kA`, cls: 'kpi--success' }
-            );
-        }
-        kpiGrid.innerHTML = kpis.map(k => `
-            <div class="kpi ${k.cls}">
-                <div class="kpi-label">${k.label}</div>
-                <div class="kpi-value">${k.value}</div>
+
+        highlightGrid.innerHTML = highlightData.map(data => `
+            <div class="highlight-card">
+                <i class="${data.icon}"></i>
+                <h4>${data.title}</h4>
+                <div class="value">${data.value}</div>
+                <p>${data.subtext}</p>
             </div>
         `).join('');
-        kpiGrid.style.display = 'grid';
     }
 
-    // Build and render summary snapshot - only adiabatic for conductors
-    const summaryData = buildResultSummary(adiabaticResults, isConductor ? null : nonAdiabaticResults);
-    renderResultSummary(summaryData);
+    if (resultDetails) {
+        resultDetails.innerHTML = `
+            <div class="detail-card">
+                <h3><i class="fas fa-equals"></i> Current Formula</h3>
+                <p class="formula">I_AD = K · S · √(ln((θ_f + β)/(θ_i + β)) / t)</p>
+                <ul class="formula-desc">
+                    <li><strong>K</strong> – Material constant from IEC 949 (A/mm²·√s)</li>
+                    <li><strong>S</strong> – Cross-sectional area of the conductor (mm²)</li>
+                    <li><strong>θ_f</strong> – Final conductor temperature (°C)</li>
+                    <li><strong>θ_i</strong> – Initial conductor temperature (°C)</li>
+                    <li><strong>β</strong> – Temperature coefficient for the material</li>
+                    <li><strong>t</strong> – Fault duration window considered adiabatic (s)</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3><i class="fas fa-square"></i> Area Formula</h3>
+                <p class="formula">S_AD = (I · √t) / (K · √ln((θ_f + β)/(θ_i + β)))</p>
+                <ul class="formula-desc">
+                    <li><strong>I</strong> – Fault current to be withstood (A)</li>
+                    <li><strong>K</strong> – Material constant (A/mm²·√s)</li>
+                    <li><strong>t</strong> – Fault clearing time (s)</li>
+                    <li><strong>θ_f</strong> – Final allowable conductor temperature during the fault (°C)</li>
+                    <li><strong>θ_i</strong> – Initial conductor temperature immediately before the event (°C)</li>
+                    <li><strong>β</strong> – Material coefficient relating resistivity to temperature</li>
+                    <li><strong>Suggested IEC size</strong> – Rounded area to the next standard conductor size</li>
+                </ul>
+            </div>
+        `;
+    }
+
+    const summaryData = buildResultSummary(adiabaticResults, suggestedArea);
     if (currentCalculationData) {
         currentCalculationData.summary = summaryData;
     }
 
-    // Check cable suitability
-    checkCableSuitability(calculationMode, params, adiabaticResults, isConductor ? null : nonAdiabaticResults);
-    
-    // Show results card
     resultsCard.style.display = 'block';
-    
-    // Scroll to results
     resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-/**
- * Check if cable is suitable based on calculated values
- */
-function checkCableSuitability(calculationMode, params, adiabaticResults, nonAdiabaticResults) {
-    const suitabilityCard = document.getElementById('suitabilityCheck');
-    let isSuitable = false;
-    let message = '';
-    let recommendation = '';
-    let safetyMargin = 0;
-    
-    if (calculationMode === 'current') {
-        // Calculate current given area
-        // User provided area, we calculated I_AD (maximum current cable can handle)
-        const providedArea = params.area;
-        const maxCurrent = nonAdiabaticResults ? nonAdiabaticResults.I_perm : adiabaticResults.I_AD;
-        const maxCurrentAdiabatic = adiabaticResults.I_AD;
-        
-        // Check if user wants to verify against a required current
-        const requiredCurrentInput = document.getElementById('current').value;
-        const requiredCurrent = requiredCurrentInput ? parseFloat(requiredCurrentInput) * 1000 : null; // Convert kA to A
-        
-        if (requiredCurrent !== null && !isNaN(requiredCurrent)) {
-            // User provided a required current to check against
-            if (maxCurrent >= requiredCurrent) {
-                isSuitable = true;
-                safetyMargin = ((maxCurrent - requiredCurrent) / requiredCurrent * 100).toFixed(2);
-                message = `✓ Cable is SUITABLE`;
-                recommendation = `✅ The cable with cross-sectional area of <strong>${providedArea.toFixed(2)} mm²</strong> can safely handle <strong>${(maxCurrent / 1000).toFixed(2)} kA</strong>, which exceeds the required <strong>${(requiredCurrent / 1000).toFixed(2)} kA</strong>.<br><br>📊 <strong>Safety Margin:</strong> ${safetyMargin}% above requirement`;
-            } else {
-                isSuitable = false;
-                const deficit = ((requiredCurrent - maxCurrent) / requiredCurrent * 100).toFixed(2);
-                message = `✗ Cable is NOT SUITABLE`;
-                recommendation = `⚠️ The cable with cross-sectional area of <strong>${providedArea.toFixed(2)} mm²</strong> can only handle <strong>${(maxCurrent / 1000).toFixed(2)} kA</strong>, but <strong>${(requiredCurrent / 1000).toFixed(2)} kA</strong> is required.<br><br>📉 <strong>Deficit:</strong> ${deficit}% below requirement<br><br>💡 <strong>Recommendation:</strong> Please select a cable with a larger cross-sectional area.`;
-            }
-        } else {
-            // No required current provided, just show capability
-            message = `ℹ Cable Capability`;
-            recommendation = `📋 The cable with cross-sectional area of <strong>${providedArea.toFixed(2)} mm²</strong> can handle up to:<br>• <strong>${(maxCurrent / 1000).toFixed(2)} kA</strong> (with non-adiabatic heating consideration)<br>• <strong>${(maxCurrentAdiabatic / 1000).toFixed(2)} kA</strong> (adiabatic condition)`;
-        }
-    } else {
-        // Calculate area given current
-        // User provided current, we calculated S_AD (minimum area required)
-        const providedCurrent = params.current;
-        const requiredArea = nonAdiabaticResults ? nonAdiabaticResults.S_non : adiabaticResults.S_AD;
-        const requiredAreaAdiabatic = adiabaticResults.S_AD;
-        
-        // Check if user provided an area to verify
-        const providedAreaInput = document.getElementById('crossSection').value;
-        const providedArea = providedAreaInput ? parseFloat(providedAreaInput) : null;
-        
-        if (providedArea !== null && !isNaN(providedArea)) {
-            // User provided an area to check against
-            if (providedArea >= requiredArea) {
-                isSuitable = true;
-                safetyMargin = ((providedArea - requiredArea) / requiredArea * 100).toFixed(2);
-                message = `✓ Cable is SUITABLE`;
-                recommendation = `✅ The provided cross-sectional area of <strong>${providedArea.toFixed(2)} mm²</strong> meets the requirement of <strong>${requiredArea.toFixed(2)} mm²</strong> for a current of <strong>${(providedCurrent / 1000).toFixed(2)} kA</strong>.<br><br>📊 <strong>Safety Margin:</strong> ${safetyMargin}% above requirement`;
-            } else {
-                isSuitable = false;
-                const deficit = ((requiredArea - providedArea) / requiredArea * 100).toFixed(2);
-                message = `✗ Cable is NOT SUITABLE`;
-                recommendation = `⚠️ The provided cross-sectional area of <strong>${providedArea.toFixed(2)} mm²</strong> is insufficient for a current of <strong>${(providedCurrent / 1000).toFixed(2)} kA</strong>.<br><br>📋 <strong>Required Area:</strong> ${requiredArea.toFixed(2)} mm²<br>📉 <strong>Deficit:</strong> ${deficit}% below requirement<br><br>💡 <strong>Recommendation:</strong> Please select a cable with at least <strong>${requiredArea.toFixed(2)} mm²</strong> cross-sectional area.`;
-            }
-        } else {
-            // No area provided for comparison, just show requirement
-            message = `ℹ Area Requirement`;
-            recommendation = `📋 For a current of <strong>${(providedCurrent / 1000).toFixed(2)} kA</strong>, the minimum required cross-sectional area is:<br>• <strong>${requiredArea.toFixed(2)} mm²</strong> (with non-adiabatic heating consideration)<br>• <strong>${requiredAreaAdiabatic.toFixed(2)} mm²</strong> (adiabatic condition)`;
-        }
-    }
-    
-    const statusClass = isSuitable ? 'suitable' : (message.includes('ℹ') ? 'info' : 'not-suitable');
-    suitabilityCard.innerHTML = `
-        <div class="suitability-status ${statusClass}">
-            <h3><i class="fas ${isSuitable ? 'fa-check-circle' : (message.includes('ℹ') ? 'fa-info-circle' : 'fa-exclamation-triangle')}"></i> ${message}</h3>
-            <p>${recommendation}</p>
-        </div>
-    `;
-    suitabilityCard.style.display = 'block';
-}
 
 // Build suitability data for export (no DOM writes)
 function computeSuitabilityData(calculationMode, params, adiabaticResults, nonAdiabaticResults) {
@@ -620,44 +572,15 @@ function computeSuitabilityData(calculationMode, params, adiabaticResults, nonAd
     return { isSuitable, message, recommendation, safetyMarginPct };
 }
 
-function buildResultSummary(adiabaticResults, nonAdiabaticResults) {
-    // Only show adiabatic results if nonAdiabaticResults is null (for conductors)
-    if (!nonAdiabaticResults) {
-        return {
-            'Adiabatic Area Required': formatArea(adiabaticResults.S_AD),
-            'Adiabatic Current (I_AD)': `${(adiabaticResults.I_AD / 1000).toFixed(2)} kA`
-        };
-    }
-    
-    const epsilon = formatNumber(nonAdiabaticResults.epsilon, 2);
-    const adjustedAreaValue = nonAdiabaticResults.S_non;
-    const suggestedArea = getSuggestedStandardArea(adjustedAreaValue);
-    const permissibleCurrentValue = nonAdiabaticResults.I_perm;
-
+function buildResultSummary(adiabaticResults, suggestedArea) {
     return {
         'Adiabatic Area Required': formatArea(adiabaticResults.S_AD),
-        'Non-Adiabatic Factor (ε)': epsilon,
-        'Adjusted Area': adjustedAreaValue ? formatArea(adjustedAreaValue) : '—',
         'Suggested Standard Size': suggestedArea ? formatArea(suggestedArea) : '—',
-        'Permissible Current': `${(permissibleCurrentValue / 1000).toFixed(2)} kA`
+        'Adiabatic Current (I_AD)': `${(adiabaticResults.I_AD / 1000).toFixed(2)} kA`
     };
 }
 
-function renderResultSummary(summaryData) {
-    const summaryCard = document.getElementById('resultsSummary');
-    if (!summaryCard) return;
-
-    const summaryJson = JSON.stringify(summaryData, null, 2).replace(/\\u00b2/g, '²');
-    summaryCard.innerHTML = `
-        <h3><i class="fas fa-code"></i> Result Snapshot</h3>
-        <pre class="code-block"><code id="summaryCode"></code></pre>
-    `;
-    const summaryCode = document.getElementById('summaryCode');
-    if (summaryCode) {
-        summaryCode.textContent = `const result = ${summaryJson};`;
-    }
-    summaryCard.style.display = 'block';
-}
+// Removed interactive panel helpers (not needed in simplified view)
 
 function formatNumber(value, decimals = 0) {
     if (value === null || value === undefined || isNaN(value)) {
@@ -1018,6 +941,13 @@ function resetForm() {
     document.getElementById('heatingForm').reset();
     document.getElementById('conductorTypeGroup').style.display = 'block'; // Keep visible
     document.getElementById('conductorType').required = true; // Keep required
+    const sheathTypeGroup = document.getElementById('sheathTypeGroup');
+    const sheathType = document.getElementById('sheathType');
+    if (sheathTypeGroup) sheathTypeGroup.style.display = 'none';
+    if (sheathType) {
+        sheathType.required = false;
+        sheathType.value = '';
+    }
     document.getElementById('nonAdiabaticParams').style.display = 'none';
     document.getElementById('results').style.display = 'none';
     
@@ -1038,17 +968,6 @@ function resetForm() {
     // Clear voltage field
     const voltageInput = document.getElementById('voltage');
     if (voltageInput) voltageInput.value = '';
-    
-    const suitabilityCard = document.getElementById('suitabilityCheck');
-    if (suitabilityCard) {
-        suitabilityCard.style.display = 'none';
-        suitabilityCard.innerHTML = '';
-    }
-    const summaryCard = document.getElementById('resultsSummary');
-    if (summaryCard) {
-        summaryCard.style.display = 'none';
-        summaryCard.innerHTML = '';
-    }
     
     // Reset calculation mode visibility
     const currentGroup = document.getElementById('currentGroup');
